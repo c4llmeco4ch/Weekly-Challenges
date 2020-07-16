@@ -1,13 +1,16 @@
 import numpy
 from collections import namedtuple
-from typing import List
+from typing import List, Tuple
 
 # Tower vectors
 T_NORTH = numpy.array([0.00, 0.43, 0.00])
 T_WEST = numpy.array([-0.50, -0.43, 0.00])
 T_EAST = numpy.array([0.50, -0.43, 0.00])
-Plane = namedtuple('Plane', ['tail_num', 'x', 'y', 'z', 'horiz_angle',
-                             'vert_angle', 'speed'])
+
+# distance_to_towers is a list/tuple/array of floats to each tower (N, W, E)
+Plane = namedtuple('Plane', ['horiz_angle',
+                             'vert_angle', 'signal_strength'])
+
 
 class Collision:
     """
@@ -17,19 +20,23 @@ class Collision:
     rather than a class
     """
     
-    def __init__(self, p1: Plane, p2: Plane,
-                 coll_point: List[int, int, int], d: float):
-        self.p1 = p1
-        self.p2 = p2
+    def __init__(
+                 self,
+                 p1_pos: Tuple[int, int, int],  # these should be numpy arrays
+                 p2_pos: Tuple[int,int,int],  # type hints don't support them
+                 coll_point: Tuple[int, int, int],  # you hate to see it
+                 d: float
+                ):
+        self.p1_pos = numpy.array(p1_pos)
+        self.p2_pos = numpy.array(p2_pos)
         self.coll_point = coll_point
         self.distance_between_planes = self.d
-    
+
     def __str__(self) -> str:
-        return f'Crash Imminent between {self.p1.tail_num} \
-                 and {self.p2.tail_num}.\nCollision will occur at \
-                 position ({self.coll_point[0]}, {self.coll_point[1]}, \
-                 {self.coll_point[2]}).\nCurrent distance between planes: \
-                 {self.distance} km.'
+        return f'Crash Imminent between plane at {self.p1_pos} \
+                 and {self.p2_pos}.\nCollision will occur at \
+                 position ({self.coll_point}).\n\
+                 Current distance between planes: {self.distance} km.'
 
     def __lt__(self, other: Collision) -> bool:
         return self.distance_between_planes < other.distance_between_planes
@@ -59,5 +66,6 @@ def determine_collisions(planes: List[Plane]) -> List[Collision]:
     collisions = []
     pairs = set()
     for pos, plane in enumerate(planes):
+        
         pass
     return sorted(collisions, key=lambda c: c.distance_between_planes)
